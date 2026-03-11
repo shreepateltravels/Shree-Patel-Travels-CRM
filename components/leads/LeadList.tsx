@@ -490,7 +490,7 @@ export default function LeadList({
 
                   {showStatusFilter && (
                     <td className="px-3 py-3">
-                      {/* Icon removed from here! Only badge remains. */}
+                      
                       {getStatusBadge(lead.status, lead.journey_date)}
                     </td>
                   )}
@@ -555,7 +555,7 @@ export default function LeadList({
                     ) : lead.status === "Cancelled" &&
                       (lead.notes || lead.cancellation_reason) ? (
                       <div className="flex items-center justify-end pr-7">
-                        {/* Cancellation icon moved here! */}
+                        
                         <button
                           onClick={() => openDrawer(lead)}
                           className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"

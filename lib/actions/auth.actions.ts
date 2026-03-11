@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-// We import the standard client to create a special Admin bypass
+
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -28,7 +28,7 @@ export async function createStaffUser(data: {
 }) {
   try {
     // 1. Initialize the Admin Client using the Service Role Key
-    // This allows us to create a user WITHOUT logging the Admin out!
+    
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -39,7 +39,7 @@ export async function createStaffUser(data: {
       await supabaseAdmin.auth.admin.createUser({
         email: data.email,
         password: data.password,
-        email_confirm: true, // Auto-confirm so they can log in immediately
+        email_confirm: true, 
       });
 
     if (authError) throw new Error(authError.message);
@@ -56,7 +56,7 @@ export async function createStaffUser(data: {
       },
     ]);
 
-    // 4. Safety Check: If the database insert fails, delete the auth credentials
+    // 4. Safety Check If the database insert fails delete the auth credentials
     if (dbError) {
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw new Error("Failed to save user profile: " + dbError.message);
@@ -72,7 +72,7 @@ export async function createStaffUser(data: {
   }
 }
 export async function updateStaffUser(id: string, data: any) {
-  const supabase = await createClient(); // Use standard client here as it's a simple DB update
+  const supabase = await createClient(); 
   await supabase.from("users").update(data).eq("id", id);
   revalidatePath("/users");
 }

@@ -6,7 +6,7 @@ export default async function CitiesPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-144px)] animate-in fade-in duration-500">
-      {/* Ensure there is NO 'max-w-4xl' or 'mx-auto' on this div! */}
+      
       <div className="flex-1 min-h-0 w-full overflow-hidden rounded-xl shadow-[0_1px_3px_0_rgb(0,0,0,0.1)]">
         <CityList initialCities={cities} />
       </div>

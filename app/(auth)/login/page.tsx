@@ -30,7 +30,7 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      // Refresh the router to trigger the middleware and go to dashboard
+      
       router.refresh();
       router.push("/");
     }
@@ -39,9 +39,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* ONE SINGLE WHITE BOX FOR EVERYTHING */}
+        
         <div className="bg-white py-10 px-4 shadow-[0_1px_2px_0_rgb(0,0,0,0.05)] sm:rounded-2xl sm:px-10 border border-[#e2e8f0] flex flex-col items-center">
-          {/* Shree Patel Travels Logo */}
+          
           <Image
             src="/logo.png"
             alt="Shree Patel Travels"

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, Loader2, User, Phone, Shield } from "lucide-react";
-import { updateStaffUser } from "@/lib/actions/auth.actions"; // We'll add this action next
+import { updateStaffUser } from "@/lib/actions/auth.actions"; 
 
 export default function EditStaffModal({
   user,

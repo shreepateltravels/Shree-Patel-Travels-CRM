@@ -29,7 +29,7 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-500">
-      {/* We pass the data to a Client Component to handle Search/Filter/Edit */}
+      
       <UsersListClient initialUsers={staff || []} />
     </div>
   );

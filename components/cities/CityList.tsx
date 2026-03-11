@@ -38,9 +38,9 @@ export default function CityList({ initialCities }: { initialCities: City[] }) {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Cities are small, 10-15 is usually good
+  const itemsPerPage = 10; 
 
-  // Reset to page 1 when search changes
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -48,8 +48,6 @@ export default function CityList({ initialCities }: { initialCities: City[] }) {
   const filteredCities = initialCities.filter((city) =>
     city.name.toLowerCase().includes(searchTerm.toLowerCase().trim()),
   );
-
-  // Pagination Logic
   const totalPages = Math.ceil(filteredCities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentCities = filteredCities.slice(
@@ -93,7 +91,7 @@ export default function CityList({ initialCities }: { initialCities: City[] }) {
       await deleteCity(cityToDelete.id);
       setCityToDelete(null);
 
-      // Safety check: if deleting the last item on a page, go back one page
+      
       if (currentCities.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }

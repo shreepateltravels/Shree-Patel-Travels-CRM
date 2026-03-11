@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
-import AddStaffModal from "./AddStaffModal"; // Import the modal we just built!
+import AddStaffModal from "./AddStaffModal";
 
 export default function AddUserButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +20,7 @@ export default function AddUserButton() {
       <AddStaffModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => setIsModalOpen(false)} // The Server Action handles the page refresh!
+        onSuccess={() => setIsModalOpen(false)}
       />
     </>
   );

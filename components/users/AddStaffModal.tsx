@@ -161,7 +161,7 @@ export default function AddStaffModal({
                 name="mobile_number"
                 maxLength={10}
                 pattern="[0-9]{10}"
-                // We add pl-[76px] to push the typing area past the +91 box
+                
                 className="input-primary pl-[76px] w-full font-medium tracking-wide"
                 placeholder="12345 67890"
                 onKeyPress={(e) => {

@@ -19,7 +19,7 @@ interface City {
   name: string;
 }
 
-// --- SMART CITY SELECTOR ---
+
 function CitySelector({
   label,
   name,
@@ -294,7 +294,7 @@ export default function LeadForm() {
   }
 
   return (
-    // FIX: Removed `h-full`. Added `h-fit` so the white card gracefully hugs its content!
+    
     <div className="saas-card bg-white p-5 flex flex-col border-t-4 border-t-[#3da9d4] shadow-sm relative overflow-hidden h-fit max-h-full">
       <div className="mb-4 shrink-0">
         <h2 className="text-lg font-bold text-slate-800">New Inquiry</h2>
@@ -304,7 +304,7 @@ export default function LeadForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
-        {/* FIX: Removed `flex-1` from here, removed `pb-28` so it packs tightly together. */}
+        
         <div className="flex flex-col gap-5 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Customer Details */}
           <div className="space-y-4">
@@ -491,7 +491,7 @@ export default function LeadForm() {
           </div>
         </div>
 
-        {/* FIX: Set to natural flow using mt-4 pt-4 border-t instead of 'absolute'. */}
+        
         <div className="mt-4 pt-4 shrink-0 flex flex-col gap-3 bg-white border-t border-slate-100">
           {showSuccess && (
             <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600 uppercase bg-emerald-50 py-2 rounded-lg border border-emerald-100 animate-in zoom-in-95">

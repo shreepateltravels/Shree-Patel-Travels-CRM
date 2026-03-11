@@ -16,7 +16,7 @@ import { signOut } from "@/lib/actions/auth.actions";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-/** Simple utility for merging tailwind classes */
+
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

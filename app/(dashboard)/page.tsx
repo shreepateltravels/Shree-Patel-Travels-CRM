@@ -15,7 +15,7 @@ import { getDashboardStats } from "@/lib/actions/lead.actions";
 export default async function DashboardPage() {
   const stats = await getDashboardStats();
 
-  // Fallback data if no leads exist yet
+  
   const data = stats || {
     total: 0,
     open: 0,

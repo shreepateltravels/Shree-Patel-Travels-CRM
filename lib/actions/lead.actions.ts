@@ -62,7 +62,6 @@ export async function createLead(data: CreateLeadPayload) {
 
   if (authError || !user) throw new Error("You must be logged in.");
 
-  // Safely format notes with a timestamp if they were added during creation!
   let formattedNotes = "";
   if (data.notes) {
     const timestamp = new Date().toLocaleString("en-IN", {
@@ -72,7 +71,7 @@ export async function createLead(data: CreateLeadPayload) {
       hour: "2-digit",
       minute: "2-digit",
     });
-    // Add @@@NONE so the timeline parser reads it cleanly
+    
     formattedNotes = `[${timestamp}] ${data.notes}@@@NONE`;
   }
 
@@ -99,7 +98,7 @@ export async function createLead(data: CreateLeadPayload) {
 
   if (error) throw new Error(error.message);
 
-  // AUTOMATION: Save to Master Customer Directory instantly
+  
   const { data: existingCustomer } = await supabase
     .from("customers")
     .select("id")
@@ -174,7 +173,7 @@ export async function updateLeadStatus(
       minute: "2-digit",
     });
 
-    // Embed the future date string directly into the note using our @@@ separator
+    
     if (nextFollowUpDate) {
       const formattedFutureDate = new Date(nextFollowUpDate).toLocaleDateString(
         "en-IN",

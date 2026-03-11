@@ -32,11 +32,7 @@ export default async function DashboardLayout({
       <Sidebar userRole={userRole} />
 
       <div className="flex-1 ml-62 flex flex-col h-full overflow-hidden">
-        {/* <TopHeader userEmail={user.email} userRole={userRole} /> */}
-
-        {/* FIX APPLIED HERE: 
-          'flex flex-col [&>*]:h-full' forces the Next.js page to take 100% of the remaining height!
-        */}
+        
         <main className="flex-1 overflow-hidden p-4 flex flex-col [&>*]:h-full">
           {children}
         </main>

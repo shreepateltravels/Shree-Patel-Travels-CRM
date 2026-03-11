@@ -37,7 +37,7 @@ export default function CustomerList({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Reset to page 1 when search changes
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
