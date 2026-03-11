@@ -22,8 +22,7 @@
   --border: #e2e8f0;
 
   /* Shadow */
-  --shadow-saas: 0 1px 3px 0 rgb(0 0 0 / 0.1),
-                 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-saas: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 /* -----------------------------
@@ -64,7 +63,6 @@
    4. COMPONENT CLASSES
 --------------------------------*/
 @layer components {
-
   /* SaaS Card */
   .saas-card {
     @apply bg-white rounded-xl border border-dashboard-border shadow-saas overflow-hidden transition-all;
@@ -82,4 +80,11 @@
     @apply bg-brand text-white font-medium px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-50;
     @apply hover:bg-brand-hover hover:shadow-md;
   }
+}
+aside[data-collapsed="true"] + div {
+  margin-left: 5rem !important; /* This is ml-20 (80px) */
+}
+
+aside[data-collapsed="false"] + div {
+  margin-left: 16rem !important; /* This is ml-64 (256px) */
 }

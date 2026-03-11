@@ -1,5 +1,4 @@
 import Sidebar from "@/components/layout/Sidebar";
-// import TopHeader from "@/components/layout/TopHeader";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -31,8 +30,10 @@ export default async function DashboardLayout({
     <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
       <Sidebar userRole={userRole} />
 
-      <div className="flex-1 ml-62 flex flex-col h-full overflow-hidden">
-        
+      {/* This container listens for the 'data-collapsed' attribute on the Sidebar.
+          It switches from ml-64 (256px) to ml-20 (80px) smoothly.
+      */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out ml-64 has-[aside[data-collapsed=true]]:ml-20">
         <main className="flex-1 overflow-hidden p-4 flex flex-col [&>*]:h-full">
           {children}
         </main>

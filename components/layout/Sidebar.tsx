@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -12,61 +13,69 @@ import {
   UserCog,
   LogOut,
   Ticket,
+  ChevronLeft, // Less than icon
+  Menu, // 3-bar icon
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth.actions";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard, adminOnly: false },
-  { name: "Enquiry", href: "/leads", icon: PhoneCall, adminOnly: false },
-  {
-    name: "Follow Ups",
-    href: "/follow-ups",
-    icon: CalendarClock,
-    adminOnly: false,
-  },
-  {
-    name: "Confirmed Bookings",
-    href: "/confirmed",
-    icon: Ticket,
-    adminOnly: false,
-  },
-  { name: "Customers", href: "/customers", icon: Users, adminOnly: false },
-  { name: "Cities", href: "/cities", icon: MapPin, adminOnly: false },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Enquiry", href: "/leads", icon: PhoneCall },
+  { name: "Follow Ups", href: "/follow-ups", icon: CalendarClock },
+  { name: "Confirmed Bookings", href: "/confirmed", icon: Ticket },
+  { name: "Customers", href: "/customers", icon: Users },
+  { name: "Cities", href: "/cities", icon: MapPin },
   { name: "Users", href: "/users", icon: UserCog, adminOnly: true },
 ];
 
-interface SidebarProps {
-  userRole: string;
-}
-
-export default function Sidebar({ userRole }: SidebarProps) {
+export default function Sidebar({ userRole }: { userRole: string }) {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-dashboard-border flex flex-col fixed left-0 top-0 z-50">
-      {/* Brand Logo Area */}
-      <div className="h-20 flex items-center px-14 border-b border-dashboard-border">
-        <Image
-          src="/SPT.png"
-          alt="Shree Patel Travels"
-          width={120}
-          height={40}
-          className="object-contain"
-        />
+    <aside
+      data-collapsed={isCollapsed}
+      className={cn(
+        "h-screen bg-white border-r border-dashboard-border flex flex-col fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-20" : "w-64",
+      )}
+    >
+      {/* HEADER AREA */}
+      <div className="h-20 flex items-center px-4 border-b border-dashboard-border relative">
+        <div className="flex-1 flex items-center justify-between overflow-hidden">
+          {isCollapsed ? (
+            /* COLLAPSED: 3-Bar Menu Icon */
+            <div
+              className="mx-auto cursor-pointer text-slate-500 hover:text-[#3da9d4] transition-colors"
+              onClick={() => setIsCollapsed(false)}
+            >
+              <Menu size={24} strokeWidth={2} />
+            </div>
+          ) : (
+            /* EXPANDED: Logo + Less Than Icon */
+            <>
+              <Image
+                src="/SPT.png"
+                alt="Logo"
+                width={180}
+                height={100}
+                className="object-contain transition-opacity duration-300 opacity-100 ml-3"
+              />
+              <button
+                onClick={() => setIsCollapsed(true)}
+                className="cursor-pointer text-slate-400 hover:text-[#3da9d4] transition-all p-1"
+              >
+                <ChevronLeft size={20} strokeWidth={2} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
-          // Role-based access control
           if (item.adminOnly && userRole !== "Admin") return null;
-
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
@@ -75,32 +84,53 @@ export default function Sidebar({ userRole }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer",
                 isActive
-                  ? "bg-brand/10 text-brand shadow-sm"
-                  : "text-muted hover:bg-slate-50 hover:text-dashboard-text",
+                  ? "bg-[#3da9d4]/10 text-[#3da9d4]"
+                  : "text-slate-500 hover:bg-slate-50",
+                isCollapsed && "justify-center px-0",
               )}
             >
               <Icon
                 className={cn(
-                  "w-5 h-5",
-                  isActive ? "text-brand" : "text-muted",
+                  "w-5 h-5 shrink-0 transition-colors",
+                  isActive ? "text-[#3da9d4]" : "group-hover:text-[#3da9d4]",
                 )}
               />
-              {item.name}
+              <span
+                className={cn(
+                  "truncate transition-all duration-300 ease-in-out",
+                  isCollapsed
+                    ? "w-0 opacity-0 invisible"
+                    : "w-auto opacity-100 visible",
+                )}
+              >
+                {item.name}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom Logout Area */}
-      <div className="p-4 border-t border-dashboard-border">
+      <div className="p-4 border-t border-slate-100">
         <button
           onClick={() => signOut()}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-medium text-muted hover:bg-danger/5 hover:text-danger transition-colors duration-200"
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-medium text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 cursor-pointer",
+            isCollapsed && "justify-center px-0",
+          )}
         >
-          <LogOut className="w-5 h-5" />
-          Logout
+          <LogOut className="w-5 h-5 shrink-0" />
+          <span
+            className={cn(
+              "transition-all duration-300",
+              isCollapsed
+                ? "w-0 opacity-0 invisible"
+                : "w-auto opacity-100 visible",
+            )}
+          >
+            Logout
+          </span>
         </button>
       </div>
     </aside>
