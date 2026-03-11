@@ -4,7 +4,7 @@ A modern, high-performance Customer Relationship Management (CRM) system built t
 
 ---
 
-# 🚀 Tech Stack
+# ⚙️ Tech Stack
 
 | Layer          | Technology                                          |
 | -------------- | --------------------------------------------------- |
