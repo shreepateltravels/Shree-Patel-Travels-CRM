@@ -464,7 +464,7 @@ export default function LeadList({
                 </th>
 
                 {isFollowUpRoute && (
-                  <th className="px-4 py-4 font-bold">Reason</th>
+                  <th className="px-4 py-4 font-bold">Follow-Up Note</th>
                 )}
 
                 <th className="px-4 py-4 font-bold text-right whitespace-nowrap">
