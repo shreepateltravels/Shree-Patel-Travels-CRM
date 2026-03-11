@@ -35,11 +35,7 @@ CREATE POLICY "Admins can manage all users"
 ON public.users FOR ALL
 USING ( public.get_user_role() = 'Admin' );
 
--- ==========================================
--- 8. AUTOMATIC USER CREATION TRIGGER
--- ==========================================
 
--- Function to insert a new user into our public table automatically
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -50,9 +46,9 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    -- If full_name is passed in metadata during signup, use it. Otherwise, default to 'New User'
+    
     COALESCE(NEW.raw_user_meta_data->>'full_name', 'New User'), 
-    'Staff' -- Everyone starts as Staff by default
+    'Admin'
   );
   RETURN NEW;
 END;
