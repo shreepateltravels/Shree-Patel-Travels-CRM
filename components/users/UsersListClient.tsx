@@ -63,7 +63,8 @@ export default function UsersListClient({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200">
-              <th className="px-6 py-4 font-bold">Name & Role</th>
+              <th className="px-6 py-4 font-bold">Name</th>
+              <th className="px-6 py-4 font-bold">Role</th>
               <th className="px-6 py-4 font-bold">Email</th>
               <th className="px-6 py-4 font-bold">Mobile</th>
               <th className="px-6 py-4 font-bold text-right">Actions</th>
@@ -80,22 +81,24 @@ export default function UsersListClient({
                     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[#3da9d4] text-sm shrink-0">
                       {member.full_name.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-800 text-sm">
-                        {member.full_name}
-                      </p>
-                      <span
-                        className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wide border ${
-                          member.role === "Admin"
-                            ? "bg-purple-50 text-purple-600 border-purple-100"
-                            : "bg-blue-50 text-blue-600 border-blue-100"
-                        }`}
-                      >
-                        {member.role}
-                      </span>
-                    </div>
+                    <p className="font-bold text-slate-800 text-sm">
+                      {member.full_name}
+                    </p>
                   </div>
                 </td>
+
+                <td className="px-6 py-4">
+                  <span
+                    className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border ${
+                      member.role === "Admin"
+                        ? "bg-purple-50 text-purple-600 border-purple-100"
+                        : "bg-blue-50 text-blue-600 border-blue-100"
+                    }`}
+                  >
+                    {member.role}
+                  </span>
+                </td>
+
                 <td className="px-6 py-4 text-sm text-slate-600 font-medium">
                   {member.email}
                 </td>

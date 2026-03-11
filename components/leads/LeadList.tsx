@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { updateLeadStatus } from "@/lib/actions/lead.actions";
 import {
   Search,
@@ -30,6 +30,7 @@ export default function LeadList({
   showCityFilters = true,
   showStatusFilter = true,
   emptyMessage = "No leads found.",
+  isFollowUpPage = false, // Fallback prop just in case
 }: {
   initialLeads: any[];
   defaultStatus?: string;
@@ -37,8 +38,14 @@ export default function LeadList({
   showCityFilters?: boolean;
   showStatusFilter?: boolean;
   emptyMessage?: string;
+  isFollowUpPage?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Auto-detect if we are on the Follow Ups page based on the URL or the prop
+  const isFollowUpRoute =
+    isFollowUpPage || (pathname && pathname.toLowerCase().includes("follow"));
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -218,6 +225,17 @@ export default function LeadList({
       setLoadingId(null);
     }
   }
+
+  // Helper to extract the most recent note text for the Reason column
+  const getLatestNote = (notes: string) => {
+    if (!notes) return "—";
+    const noteArray = notes.split("|||").filter(Boolean);
+    if (noteArray.length === 0) return "—";
+    const lastNoteStr = noteArray[noteArray.length - 1];
+
+    const match = lastNoteStr.match(/^\[.*?\]\s*([\s\S]*?)(?:@@@|$)/);
+    return match && match[1] ? match[1].trim() : "—";
+  };
 
   const getStatusBadge = (status: string, journeyDate: string) => {
     if (status === "New" && journeyDate < todayStr) {
@@ -416,7 +434,7 @@ export default function LeadList({
         </div>
       </div>
 
-      {/* TABLE LIST */}
+      {/* TABLE LIST - Removed artificial width constraints so columns spread evenly */}
       <div className="flex-1 overflow-x-auto overflow-y-auto p-0 custom-scrollbar">
         {filteredLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">
@@ -424,19 +442,34 @@ export default function LeadList({
             <p className="text-sm font-medium">{emptyMessage}</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse whitespace-nowrap">
+          <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 bg-slate-50 z-10">
               <tr className="text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200 shadow-sm">
-                <th className="px-3 py-3 font-bold">Name</th>
-                <th className="px-3 py-3 font-bold">Type</th>
-                <th className="px-3 py-3 font-bold">Mobile Number</th>
-                <th className="px-3 py-3 font-bold">Route</th>
-                <th className="px-3 py-3 font-bold">Journey Date</th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">Name</th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">Type</th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">
+                  Mobile Number
+                </th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">Route</th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">
+                  Journey Date
+                </th>
                 {showStatusFilter && (
-                  <th className="px-3 py-3 font-bold">Status</th>
+                  <th className="px-4 py-4 font-bold whitespace-nowrap">
+                    Status
+                  </th>
                 )}
-                <th className="px-3 py-3 font-bold">Next Follow-Up</th>
-                <th className="px-3 py-3 font-bold text-right">Actions</th>
+                <th className="px-4 py-4 font-bold whitespace-nowrap">
+                  Next Follow-Up
+                </th>
+
+                {isFollowUpRoute && (
+                  <th className="px-4 py-4 font-bold">Reason</th>
+                )}
+
+                <th className="px-4 py-4 font-bold text-right whitespace-nowrap">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -445,7 +478,7 @@ export default function LeadList({
                   key={lead.id}
                   className="hover:bg-slate-50/80 transition-colors group"
                 >
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#3da9d4]/10 flex items-center justify-center text-[#3da9d4] font-bold shrink-0 text-xs">
                         {(lead.customer_name || "U").charAt(0).toUpperCase()}
@@ -456,7 +489,7 @@ export default function LeadList({
                     </div>
                   </td>
 
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <span
                       className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${
                         lead.type === "Ticket"
@@ -468,13 +501,13 @@ export default function LeadList({
                     </span>
                   </td>
 
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm text-slate-600 font-medium">
                       {lead.mobile_number}
                     </div>
                   </td>
 
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm text-slate-700 font-semibold flex items-center gap-1.5">
                       {lead.from_city?.name}{" "}
                       <ArrowRight className="w-3.5 h-3.5 text-slate-400" />{" "}
@@ -482,20 +515,19 @@ export default function LeadList({
                     </div>
                   </td>
 
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm text-slate-600 font-medium">
                       {new Date(lead.journey_date).toLocaleDateString("en-GB")}
                     </div>
                   </td>
 
                   {showStatusFilter && (
-                    <td className="px-3 py-3">
-                      
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {getStatusBadge(lead.status, lead.journey_date)}
                     </td>
                   )}
 
-                  <td className="px-3 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {lead.status !== "Booked" &&
                     lead.status !== "Cancelled" &&
                     lead.next_follow_up_date ? (
@@ -511,23 +543,33 @@ export default function LeadList({
                     )}
                   </td>
 
-                  <td className="px-3 py-3 text-right">
+                  {isFollowUpRoute && (
+                    <td className="px-4 py-3 min-w-[200px] whitespace-normal break-words">
+                      <div className="text-sm text-slate-600 leading-snug">
+                        {getLatestNote(lead.notes)}
+                      </div>
+                    </td>
+                  )}
+
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
                     {lead.status !== "Booked" && lead.status !== "Cancelled" ? (
                       <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() =>
-                            setStatusModal({
-                              id: lead.id,
-                              status: "Booked",
-                              title: "Mark Booked",
-                              placeholder: "Add final booking details...",
-                            })
-                          }
-                          className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
-                          title="Mark as Booked"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                        </button>
+                        {!isFollowUpRoute && (
+                          <button
+                            onClick={() =>
+                              setStatusModal({
+                                id: lead.id,
+                                status: "Booked",
+                                title: "Mark Booked",
+                                placeholder: "Add final booking details...",
+                              })
+                            }
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                            title="Mark as Booked"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
 
                         <button
                           onClick={() => openDrawer(lead)}
@@ -537,25 +579,26 @@ export default function LeadList({
                           <Clock className="w-4 h-4" />
                         </button>
 
-                        <button
-                          onClick={() =>
-                            setStatusModal({
-                              id: lead.id,
-                              status: "Cancelled",
-                              title: "Cancel Lead",
-                              placeholder: "Why was this cancelled?...",
-                            })
-                          }
-                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
-                          title="Cancel Lead"
-                        >
-                          <XCircle className="w-4 h-4" />
-                        </button>
+                        {!isFollowUpRoute && (
+                          <button
+                            onClick={() =>
+                              setStatusModal({
+                                id: lead.id,
+                                status: "Cancelled",
+                                title: "Cancel Lead",
+                                placeholder: "Why was this cancelled?...",
+                              })
+                            }
+                            className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                            title="Cancel Lead"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     ) : lead.status === "Cancelled" &&
                       (lead.notes || lead.cancellation_reason) ? (
                       <div className="flex items-center justify-end pr-7">
-                        
                         <button
                           onClick={() => openDrawer(lead)}
                           className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"

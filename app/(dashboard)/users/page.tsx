@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import UsersListClient from "@/components/users/UsersListClient"; // We'll create this next
+import UsersListClient from "@/components/users/UsersListClient";
 
 export const dynamic = "force-dynamic";
 

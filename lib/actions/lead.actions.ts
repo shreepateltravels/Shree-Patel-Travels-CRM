@@ -23,7 +23,13 @@ export async function getDashboardStats() {
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: allLeads, error } = await supabase.from("leads").select("*");
+  // CHANGED: Added city relation queries so Recent Activity can show the route!
+  const { data: allLeads, error } = await supabase
+    .from("leads")
+    .select(
+      "*, from_city:cities!from_city_id(name), to_city:cities!to_city_id(name)",
+    );
+
   if (error || !allLeads) return null;
 
   return {
@@ -39,8 +45,9 @@ export async function getDashboardStats() {
     todaysFollowUps: allLeads.filter(
       (l) => l.status === "Follow Up" && l.notes?.includes(today),
     ).length,
+
     upcomingJourneys: allLeads.filter(
-      (l) => l.journey_date >= today && l.status !== "Cancelled",
+      (l) => l.journey_date >= today && l.status === "Booked",
     ).length,
     recentLeads: allLeads
       .sort(
@@ -71,7 +78,7 @@ export async function createLead(data: CreateLeadPayload) {
       hour: "2-digit",
       minute: "2-digit",
     });
-    
+
     formattedNotes = `[${timestamp}] ${data.notes}@@@NONE`;
   }
 
@@ -98,7 +105,6 @@ export async function createLead(data: CreateLeadPayload) {
 
   if (error) throw new Error(error.message);
 
-  
   const { data: existingCustomer } = await supabase
     .from("customers")
     .select("id")
@@ -173,7 +179,6 @@ export async function updateLeadStatus(
       minute: "2-digit",
     });
 
-    
     if (nextFollowUpDate) {
       const formattedFutureDate = new Date(nextFollowUpDate).toLocaleDateString(
         "en-IN",
@@ -258,7 +263,6 @@ export async function updateLeadStatus(
     }
   }
 
-  
   revalidatePath("/leads");
   revalidatePath("/follow-ups");
   revalidatePath("/customers");
@@ -338,7 +342,6 @@ export async function deleteCity(id: string) {
 export async function addManualCustomer(name: string, mobile_number: string) {
   const supabase = await createClient();
 
-  
   const { data: existing } = await supabase
     .from("customers")
     .select("id")
@@ -349,7 +352,6 @@ export async function addManualCustomer(name: string, mobile_number: string) {
     return { error: "A customer with this mobile number already exists." };
   }
 
-
   const { error } = await supabase
     .from("customers")
     .insert([{ name, mobile_number }]);
@@ -358,7 +360,19 @@ export async function addManualCustomer(name: string, mobile_number: string) {
     return { error: error.message };
   }
 
-  
   revalidatePath("/customers");
   return { success: true };
+}
+
+export async function getConfirmedLeads() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select(
+      `*, from_city:cities!from_city_id(name), to_city:cities!to_city_id(name)`,
+    )
+    .eq("status", "Booked")
+    .order("created_at", { ascending: false });
+
+  return data || [];
 }

@@ -8,6 +8,7 @@ import {
   Bell,
   Bus,
   ArrowUpRight,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/actions/lead.actions";
@@ -123,46 +124,78 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* RECENT ACTIVITY */}
-        <div className="lg:col-span-2 saas-card p-6 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">
-            Recent Activity
-          </h2>
+        <div className="lg:col-span-2 saas-card p-0 flex flex-col overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
+            <h2 className="text-lg font-bold text-slate-800">
+              Recent Activity
+            </h2>
+          </div>
+
           {stats?.recentLeads && stats.recentLeads.length > 0 ? (
-            <div className="divide-y divide-slate-100">
-              {stats.recentLeads.map((lead: any) => (
-                <div
-                  key={lead.id}
-                  className="py-3 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
-                      {lead.customer_name[0]}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">
-                        {lead.customer_name}
-                      </p>
-                      <p className="text-xs text-slate-500">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Name</th>
+                    <th className="px-6 py-4 font-semibold">No</th>
+                    <th className="px-6 py-4 font-semibold">Type</th>
+                    <th className="px-6 py-4 font-semibold">Route</th>
+                    <th className="px-6 py-4 font-semibold">Journey Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {stats.recentLeads.map((lead: any) => (
+                    <tr
+                      key={lead.id}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0">
+                            {lead.customer_name[0]}
+                          </div>
+                          <p className="font-bold text-slate-800">
+                            {lead.customer_name}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 font-medium">
                         {lead.mobile_number}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                      lead.status === "Booked"
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-blue-50 text-blue-600"
-                    }`}
-                  >
-                    {lead.status}
-                  </span>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-[10px] px-2 py-1 rounded font-bold uppercase tracking-wider ${
+                            lead.type === "Ticket"
+                              ? "bg-indigo-50 text-indigo-600"
+                              : "bg-orange-50 text-orange-600"
+                          }`}
+                        >
+                          {lead.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium">
+                          {lead.from_city?.name}
+                          <ArrowRight className="w-3 h-3 text-slate-400" />
+                          {lead.to_city?.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 font-medium">
+                        {new Date(lead.journey_date).toLocaleDateString(
+                          "en-GB",
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50 min-h-[200px]">
-              <List className="w-8 h-8 text-slate-300 mb-2" />
-              <p className="text-slate-400 text-sm">
+            <div className="flex-1 flex flex-col items-center justify-center p-12 min-h-[250px]">
+              <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+                <List className="w-8 h-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 font-medium">
                 No activity recorded yet.
               </p>
             </div>
@@ -170,7 +203,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* QUICK LINKS */}
-        <div className="saas-card p-6">
+        <div className="saas-card p-6 h-fit">
           <h2 className="text-lg font-bold text-slate-800 mb-4">Quick Links</h2>
           <div className="space-y-3">
             {[

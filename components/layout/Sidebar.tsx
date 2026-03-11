@@ -11,11 +11,11 @@ import {
   MapPin,
   UserCog,
   LogOut,
+  Ticket,
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth.actions";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,6 +28,12 @@ const navItems = [
     name: "Follow Ups",
     href: "/follow-ups",
     icon: CalendarClock,
+    adminOnly: false,
+  },
+  {
+    name: "Confirmed Bookings",
+    href: "/confirmed",
+    icon: Ticket,
     adminOnly: false,
   },
   { name: "Customers", href: "/customers", icon: Users, adminOnly: false },
@@ -71,7 +77,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-brand/10 text-brand shadow-sm" // Modern active state
+                  ? "bg-brand/10 text-brand shadow-sm"
                   : "text-muted hover:bg-slate-50 hover:text-dashboard-text",
               )}
             >
