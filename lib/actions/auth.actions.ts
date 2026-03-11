@@ -18,7 +18,6 @@ export async function signOut() {
   redirect("/login");
 }
 
-// --- 2. CREATE STAFF USER (ADMIN ONLY) ---
 export async function createStaffUser(data: {
   full_name: string;
   email: string;
@@ -27,28 +26,24 @@ export async function createStaffUser(data: {
   mobile_number: string;
 }) {
   try {
-    // 1. Initialize the Admin Client using the Service Role Key
-    
     const supabaseAdmin = createAdminClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
-    // 2. Create the user in the hidden Supabase Auth system
     const { data: authData, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
         email: data.email,
         password: data.password,
-        email_confirm: true, 
+        email_confirm: true,
       });
 
     if (authError) throw new Error(authError.message);
     if (!authData.user) throw new Error("Failed to create user credentials.");
 
-    // 3. Save their visible details to your public 'users' table
     const { error: dbError } = await supabaseAdmin.from("users").insert([
       {
-        id: authData.user.id, // Tie it directly to their login ID
+        id: authData.user.id,
         email: data.email,
         full_name: data.full_name,
         role: data.role,
@@ -56,13 +51,11 @@ export async function createStaffUser(data: {
       },
     ]);
 
-    // 4. Safety Check If the database insert fails delete the auth credentials
     if (dbError) {
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw new Error("Failed to save user profile: " + dbError.message);
     }
 
-    // 5. Refresh the page so the new user appears in the list instantly
     revalidatePath("/users");
 
     return { success: true };
@@ -72,7 +65,7 @@ export async function createStaffUser(data: {
   }
 }
 export async function updateStaffUser(id: string, data: any) {
-  const supabase = await createClient(); 
+  const supabase = await createClient();
   await supabase.from("users").update(data).eq("id", id);
   revalidatePath("/users");
 }
