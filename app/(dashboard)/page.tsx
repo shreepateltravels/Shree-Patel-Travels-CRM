@@ -15,7 +15,6 @@ import { getDashboardStats } from "@/lib/actions/lead.actions";
 export default async function DashboardPage() {
   const stats = await getDashboardStats();
 
-  
   const data = stats || {
     total: 0,
     open: 0,
