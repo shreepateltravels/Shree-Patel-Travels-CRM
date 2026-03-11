@@ -258,7 +258,7 @@ export async function updateLeadStatus(
     }
   }
 
-  // 7. Refresh everything for a smooth UI experience
+  
   revalidatePath("/leads");
   revalidatePath("/follow-ups");
   revalidatePath("/customers");
@@ -338,7 +338,7 @@ export async function deleteCity(id: string) {
 export async function addManualCustomer(name: string, mobile_number: string) {
   const supabase = await createClient();
 
-  // 1. Check if they already exist so we don't make duplicates
+  
   const { data: existing } = await supabase
     .from("customers")
     .select("id")
@@ -349,7 +349,7 @@ export async function addManualCustomer(name: string, mobile_number: string) {
     return { error: "A customer with this mobile number already exists." };
   }
 
-  // 2. Insert the new customer
+
   const { error } = await supabase
     .from("customers")
     .insert([{ name, mobile_number }]);
@@ -358,7 +358,7 @@ export async function addManualCustomer(name: string, mobile_number: string) {
     return { error: error.message };
   }
 
-  // 3. Refresh the page
+  
   revalidatePath("/customers");
   return { success: true };
 }
