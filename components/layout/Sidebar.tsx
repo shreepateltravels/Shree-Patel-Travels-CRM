@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // <-- Added useEffect
+import { createPortal } from "react-dom"; // <-- Added createPortal
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -13,15 +14,17 @@ import {
   UserCog,
   LogOut,
   Ticket,
-  ChevronLeft, // Less than icon
-  Menu, // 3-bar icon
+  ChevronLeft,
+  Menu,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth.actions";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Enquiry", href: "/leads", icon: PhoneCall },
+  { name: "Enquiry", href: "/enquiry", icon: PhoneCall },
   { name: "Follow Ups", href: "/follow-ups", icon: CalendarClock },
   { name: "Confirmed Bookings", href: "/confirmed", icon: Ticket },
   { name: "Customers", href: "/customers", icon: Users },
@@ -29,110 +32,232 @@ const navItems = [
   { name: "Users", href: "/users", icon: UserCog, adminOnly: true },
 ];
 
-export default function Sidebar({ userRole }: { userRole: string }) {
+export default function Sidebar({
+  userRole,
+  userName = "User",
+}: {
+  userRole: string;
+  userName?: string;
+}) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isProfileExpanded, setIsProfileExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false); // <-- Added for Portal
+
+  // Ensures Portal only runs on the client to prevent Next.js errors
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const initials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 1)
+    .toUpperCase();
 
   return (
-    <aside
-      data-collapsed={isCollapsed}
-      className={cn(
-        "h-screen bg-white border-r border-dashboard-border flex flex-col fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-64",
-      )}
-    >
-      {/* HEADER AREA */}
-      <div className="h-20 flex items-center px-4 border-b border-dashboard-border relative">
-        <div className="flex-1 flex items-center justify-between overflow-hidden">
-          {isCollapsed ? (
-            /* COLLAPSED: 3-Bar Menu Icon */
-            <div
-              className="mx-auto cursor-pointer text-slate-500 hover:text-[#3da9d4] transition-colors"
-              onClick={() => setIsCollapsed(false)}
-            >
-              <Menu size={24} strokeWidth={2} />
-            </div>
-          ) : (
-            /* EXPANDED: Logo + Less Than Icon */
-            <>
-              <Image
-                src="/SPT.png"
-                alt="Logo"
-                width={180}
-                height={100}
-                className="object-contain transition-opacity duration-300 opacity-100 ml-3"
-              />
-              <button
-                onClick={() => setIsCollapsed(true)}
-                className="cursor-pointer text-slate-400 hover:text-[#3da9d4] transition-all p-1"
+    <>
+      <aside
+        data-collapsed={isCollapsed}
+        className={cn(
+          "peer h-screen bg-white border-r border-dashboard-border flex flex-col fixed left-0 top-0 z-40 transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-20" : "w-64",
+        )}
+      >
+        {/* HEADER AREA */}
+        <div className="h-20 flex items-center px-4 border-b border-dashboard-border relative shrink-0">
+          <div className="flex-1 flex items-center justify-between overflow-hidden">
+            {isCollapsed ? (
+              <div
+                className="mx-auto cursor-pointer text-slate-500 hover:text-[#3da9d4] transition-colors p-2"
+                onClick={() => setIsCollapsed(false)}
               >
-                <ChevronLeft size={20} strokeWidth={2} />
-              </button>
-            </>
+                <Menu size={24} strokeWidth={2} />
+              </div>
+            ) : (
+              <>
+                <Image
+                  src="/SPT.png"
+                  alt="Logo"
+                  width={150}
+                  height={35}
+                  className="object-contain transition-opacity duration-300 opacity-100 ml-4"
+                />
+                <button
+                  onClick={() => setIsCollapsed(true)}
+                  className="cursor-pointer text-slate-400 hover:text-[#3da9d4] transition-all p-2 mr-1"
+                >
+                  <ChevronLeft size={20} strokeWidth={2.5} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* NAVIGATION LINKS */}
+        <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
+          {navItems.map((item) => {
+            if (item.adminOnly && userRole !== "Admin") return null;
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer",
+                  isActive
+                    ? "bg-[#3da9d4]/10 text-[#3da9d4]"
+                    : "text-slate-900 hover:bg-slate-50",
+                  isCollapsed && "justify-center px-0",
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "w-5 h-5 shrink-0 transition-colors",
+                    isActive ? "text-[#3da9d4]" : "group-hover:text-[#3da9d4]",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "truncate transition-all duration-300 ease-in-out",
+                    isCollapsed
+                      ? "w-0 opacity-0 invisible"
+                      : "w-auto opacity-100 visible",
+                  )}
+                >
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* PROFILE & LOGOUT SECTION */}
+        <div className="p-2 pb-3 border-t border-slate-100 shrink-0 bg-white">
+          {isCollapsed ? (
+            /* COLLAPSED: Red Logout Icon Button */
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="flex items-center justify-center w-full py-3.5 rounded-[14px] bg-[#ee1c2e] text-white hover:bg-[#d41828] transition-colors shadow-sm animate-in fade-in duration-300"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5 shrink-0 ml-1" />
+            </button>
+          ) : (
+            /* EXPANDED: Interactive Profile Card Accordion */
+            <div className="animate-in fade-in duration-300">
+              <p className="text-[11px] font-bold text-slate-500 tracking-wider mb-2.5 px-2">
+                MY PROFILE
+              </p>
+
+              {/* Accordion Container with Soft Shadow */}
+              <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] transition-all duration-300">
+                <div
+                  onClick={() => setIsProfileExpanded(!isProfileExpanded)}
+                  className="group/profile flex items-center gap-2 p-2 cursor-pointer hover:bg-slate-50/50 transition-colors z-10 relative bg-white"
+                >
+                  <div className="w-10 h-10 rounded-full bg-[#ebf6fa] flex items-center justify-center text-[#3da9d4] font-black text-[15px] shrink-0">
+                    {initials}
+                  </div>
+
+                  <div className="flex-1 min-w-0 pr-1">
+                    <p className="text-[14px] font-bold text-[#1e224c] truncate">
+                      {userName}
+                    </p>
+                    <p className="text-[12px] text-slate-400 truncate font-medium mt-0.5">
+                      {userRole}
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 transition-transform duration-300">
+                    {isProfileExpanded ? (
+                      <ChevronDown
+                        className="w-5 h-5 text-slate-400 group-hover/profile:text-[#3da9d4] transition-colors"
+                        strokeWidth={2}
+                      />
+                    ) : (
+                      <ChevronUp
+                        className="w-5 h-5 text-slate-400 group-hover/profile:text-[#3da9d4] transition-colors"
+                        strokeWidth={2}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Hidden until clicked: Logout Button Area */}
+                <div
+                  className={cn(
+                    "transition-all duration-300 ease-in-out bg-white",
+                    isProfileExpanded
+                      ? "max-h-24 opacity-100"
+                      : "max-h-0 opacity-0",
+                  )}
+                >
+                  <div className="h-px bg-slate-100 mx-3" />
+
+                  <div className="p-2 pt-2.5">
+                    <button
+                      onClick={() => setIsLogoutModalOpen(true)}
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[12px] bg-[#ee1c2e] text-white hover:bg-[#d41828] transition-colors font-semibold text-[14px] shadow-sm"
+                    >
+                      <LogOut className="w-[18px] h-[18px]" strokeWidth={2.5} />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
-      </div>
+      </aside>
 
-      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
-        {navItems.map((item) => {
-          if (item.adminOnly && userRole !== "Admin") return null;
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+      
+      {mounted &&
+        isLogoutModalOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/40 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[400px] overflow-hidden animate-in zoom-in-95 p-7">
+              <div className="flex items-start gap-5 mb-7">
+                <div className="w-[52px] h-[52px] rounded-full bg-[#ffeaec] flex items-center justify-center shrink-0">
+                  <LogOut
+                    className="w-6 h-6 text-[#ee1c2e] ml-1"
+                    strokeWidth={2.5}
+                  />
+                </div>
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer",
-                isActive
-                  ? "bg-[#3da9d4]/10 text-[#3da9d4]"
-                  : "text-slate-500 hover:bg-slate-50",
-                isCollapsed && "justify-center px-0",
-              )}
-            >
-              <Icon
-                className={cn(
-                  "w-5 h-5 shrink-0 transition-colors",
-                  isActive ? "text-[#3da9d4]" : "group-hover:text-[#3da9d4]",
-                )}
-              />
-              <span
-                className={cn(
-                  "truncate transition-all duration-300 ease-in-out",
-                  isCollapsed
-                    ? "w-0 opacity-0 invisible"
-                    : "w-auto opacity-100 visible",
-                )}
-              >
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
+                <div className="pt-1">
+                  <h3 className="text-[19px] font-bold text-[#2c245c]">
+                    Confirm Logout
+                  </h3>
+                  <p className="text-[14px] text-slate-500 mt-1.5 leading-relaxed pr-2">
+                    Are you sure you want to logout? You will need to login
+                    again to access your account.
+                  </p>
+                </div>
+              </div>
 
-      <div className="p-4 border-t border-slate-100">
-        <button
-          onClick={() => signOut()}
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-medium text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 cursor-pointer",
-            isCollapsed && "justify-center px-0",
-          )}
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <span
-            className={cn(
-              "transition-all duration-300",
-              isCollapsed
-                ? "w-0 opacity-0 invisible"
-                : "w-auto opacity-100 visible",
-            )}
-          >
-            Logout
-          </span>
-        </button>
-      </div>
-    </aside>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsLogoutModalOpen(false)}
+                  className="flex-1 py-3.5 rounded-[14px] border border-slate-200 text-slate-600 font-bold text-[15px] hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => signOut()}
+                  className="flex-1 py-3.5 rounded-[14px] bg-[#ee1c2e] text-white font-bold text-[15px] hover:bg-[#d41828] transition-colors shadow-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }

@@ -1,5 +1,5 @@
-import LeadForm from "@/components/leads/LeadForm";
-import LeadList from "@/components/leads/LeadList";
+import LeadForm from "@/components/enquiry/LeadForm";
+import LeadList from "@/components/enquiry/LeadList";
 import { getLeads, getCities } from "@/lib/actions/lead.actions";
 
 export default async function LeadsPage() {

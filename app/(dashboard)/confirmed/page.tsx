@@ -1,4 +1,4 @@
-import LeadList from "@/components/leads/LeadList";
+import LeadList from "@/components/enquiry/LeadList";
 import { getConfirmedLeads, getCities } from "@/lib/actions/lead.actions";
 
 export const dynamic = "force-dynamic";

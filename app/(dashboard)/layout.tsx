@@ -18,22 +18,22 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // 1. Fetch both role and full_name from the database
   const { data: userData } = await supabase
     .from("users")
-    .select("role")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
 
   const userRole = userData?.role || "Staff";
 
+  const userName = userData?.full_name || "User";
+
   return (
     <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
-      <Sidebar userRole={userRole} />
+      <Sidebar userRole={userRole} userName={userName} />
 
-      {/* This container listens for the 'data-collapsed' attribute on the Sidebar.
-          It switches from ml-64 (256px) to ml-20 (80px) smoothly.
-      */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out ml-64 has-[aside[data-collapsed=true]]:ml-20">
+      <div className="flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out ml-64 peer-data-[collapsed=true]:ml-20">
         <main className="flex-1 overflow-hidden p-4 flex flex-col [&>*]:h-full">
           {children}
         </main>

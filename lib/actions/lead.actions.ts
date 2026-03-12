@@ -124,7 +124,7 @@ export async function createLead(data: CreateLeadPayload) {
     ]);
   }
 
-  revalidatePath("/leads");
+  revalidatePath("/enquiry");
   revalidatePath("/customers");
   revalidatePath("/follow-ups");
   revalidatePath("/");
@@ -139,6 +139,7 @@ export async function getLeads() {
     .select(
       `*, from_city:cities!from_city_id(name), to_city:cities!to_city_id(name)`,
     )
+    .neq("status", "Booked")
     .order("created_at", { ascending: false });
 
   return leads || [];
@@ -263,7 +264,7 @@ export async function updateLeadStatus(
     }
   }
 
-  revalidatePath("/leads");
+  revalidatePath("/enquiry");
   revalidatePath("/follow-ups");
   revalidatePath("/customers");
   revalidatePath("/");
@@ -311,7 +312,7 @@ export async function addCity(name: string) {
     .insert([{ name: name.trim() }]);
   if (error) throw new Error(error.message);
   revalidatePath("/cities");
-  revalidatePath("/leads");
+  revalidatePath("/enquiry");
 }
 
 export async function updateCity(id: string, name: string) {

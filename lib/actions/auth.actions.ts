@@ -41,7 +41,7 @@ export async function createStaffUser(data: {
     if (authError) throw new Error(authError.message);
     if (!authData.user) throw new Error("Failed to create user credentials.");
 
-    const { error: dbError } = await supabaseAdmin.from("users").insert([
+    const { error: dbError } = await supabaseAdmin.from("users").upsert([
       {
         id: authData.user.id,
         email: data.email,
@@ -50,7 +50,6 @@ export async function createStaffUser(data: {
         mobile_number: data.mobile_number,
       },
     ]);
-
     if (dbError) {
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       throw new Error("Failed to save user profile: " + dbError.message);

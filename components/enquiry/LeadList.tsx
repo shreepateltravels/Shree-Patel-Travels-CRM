@@ -382,7 +382,6 @@ export default function LeadList({
             <option value="">All Statuses</option>
             <option value="New">New</option>
             <option value="Follow Up">Follow Up</option>
-            <option value="Booked">Booked</option>
             <option value="Cancelled">Cancelled</option>
             <option value="Auto Closed">Auto Closed</option>
           </select>

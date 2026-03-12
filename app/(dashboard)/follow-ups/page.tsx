@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import LeadList from "@/components/leads/LeadList";
+import LeadList from "@/components/enquiry/LeadList";
 import { getFollowUpLeads, getCities } from "@/lib/actions/lead.actions";
 
 export default async function FollowUpsPage() {

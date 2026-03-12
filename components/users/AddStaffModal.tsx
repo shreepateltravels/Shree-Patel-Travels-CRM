@@ -109,17 +109,17 @@ export default function AddStaffModal({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Temporary Password *
+              Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 required
-                type="text"
+                type="password"
                 name="password"
                 minLength={6}
                 className="input-primary pl-9 w-full"
-                placeholder="Min 6 characters"
+                placeholder="••••••••"
               />
             </div>
           </div>
@@ -135,8 +135,8 @@ export default function AddStaffModal({
                 name="role"
                 className="input-primary pl-9 w-full appearance-none"
               >
-                <option value="Staff">Staff (Can manage leads only)</option>
-                <option value="Admin">Admin (Full system access)</option>
+                <option value="Admin">Admin</option>
+                <option value="Staff">Staff</option>
               </select>
             </div>
           </div>
@@ -161,7 +161,6 @@ export default function AddStaffModal({
                 name="mobile_number"
                 maxLength={10}
                 pattern="[0-9]{10}"
-                
                 className="input-primary pl-[76px] w-full font-medium tracking-wide"
                 placeholder="12345 67890"
                 onKeyPress={(e) => {
