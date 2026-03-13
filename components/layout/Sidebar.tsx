@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react"; // <-- Added useEffect
-import { createPortal } from "react-dom"; // <-- Added createPortal
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -43,9 +43,8 @@ export default function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isProfileExpanded, setIsProfileExpanded] = useState(false);
-  const [mounted, setMounted] = useState(false); // <-- Added for Portal
+  const [mounted, setMounted] = useState(false); 
 
-  // Ensures Portal only runs on the client to prevent Next.js errors
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -215,7 +214,6 @@ export default function Sidebar({
         </div>
       </aside>
 
-      
       {mounted &&
         isLogoutModalOpen &&
         createPortal(
