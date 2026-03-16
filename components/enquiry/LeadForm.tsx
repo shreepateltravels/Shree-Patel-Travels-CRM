@@ -19,7 +19,6 @@ interface City {
   name: string;
 }
 
-
 function CitySelector({
   label,
   name,
@@ -269,10 +268,13 @@ export default function LeadForm() {
         status: "New",
         number_of_seats:
           leadType === "Ticket"
-            ? Number(formData.get("number_of_seats"))
+            ? parseInt(formData.get("number_of_seats") as string, 10)
             : null,
-        parcel_weight:
-          leadType === "Parcel" ? Number(formData.get("parcel_weight")) : null,
+        // CHANGED: Using parcel_count instead of parcel_weight
+        parcel_count:
+          leadType === "Parcel"
+            ? parseInt(formData.get("parcel_count") as string, 10)
+            : null,
         notes: formData.get("notes") as string,
       });
 
@@ -294,7 +296,6 @@ export default function LeadForm() {
   }
 
   return (
-    
     <div className="saas-card bg-white p-5 flex flex-col border-t-4 border-t-[#3da9d4] shadow-sm relative overflow-hidden h-fit max-h-full">
       <div className="mb-4 shrink-0">
         <h2 className="text-lg font-bold text-slate-800">New Inquiry</h2>
@@ -304,7 +305,6 @@ export default function LeadForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col min-h-0">
-        
         <div className="flex flex-col gap-5 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Customer Details */}
           <div className="space-y-4">
@@ -455,23 +455,31 @@ export default function LeadForm() {
                     required
                     type="number"
                     min="1"
+                    step="1"
                     name="number_of_seats"
                     className="input-primary w-full text-sm py-2.5"
                     placeholder="Quantity"
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) e.preventDefault();
+                    }}
                   />
                 </div>
               ) : (
                 <div className="animate-in fade-in slide-in-from-right-2">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Weight (kg) *
+                    Parcel Count *
                   </label>
                   <input
                     required
                     type="number"
                     min="1"
-                    name="parcel_weight"
+                    step="1"
+                    name="parcel_count"
                     className="input-primary w-full text-sm py-2.5"
-                    placeholder="e.g. 15"
+                    placeholder="Number of parcels"
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) e.preventDefault();
+                    }}
                   />
                 </div>
               )}
@@ -491,7 +499,6 @@ export default function LeadForm() {
           </div>
         </div>
 
-        
         <div className="mt-4 pt-4 shrink-0 flex flex-col gap-3 bg-white border-t border-slate-100">
           {showSuccess && (
             <div className="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600 uppercase bg-emerald-50 py-2 rounded-lg border border-emerald-100 animate-in zoom-in-95">

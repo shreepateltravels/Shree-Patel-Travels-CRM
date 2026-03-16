@@ -1,0 +1,1 @@
+ALTER TABLE leads RENAME COLUMN parcel_weight TO parcel_count;

@@ -13,7 +13,7 @@ export interface CreateLeadPayload {
   type: "Ticket" | "Parcel";
   status: "New" | "Follow Up" | "Booked" | "Cancelled";
   number_of_seats?: number | null;
-  parcel_weight?: number | null;
+  parcel_count?: number | null; // Updated from weight to count
   notes?: string;
   next_follow_up_date?: string | null;
 }
@@ -23,7 +23,6 @@ export async function getDashboardStats() {
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];
 
-  // CHANGED: Added city relation queries so Recent Activity can show the route!
   const { data: allLeads, error } = await supabase
     .from("leads")
     .select(
@@ -91,7 +90,7 @@ export async function createLead(data: CreateLeadPayload) {
     type: data.type,
     status: data.status,
     number_of_seats: data.number_of_seats,
-    parcel_weight: data.parcel_weight,
+    parcel_count: data.parcel_count, // Updated to match DB rename
     notes: formattedNotes || null,
     next_follow_up_date: data.next_follow_up_date || null,
     created_by: user.id,
@@ -124,6 +123,7 @@ export async function createLead(data: CreateLeadPayload) {
     ]);
   }
 
+  // Paths updated to /enquiry
   revalidatePath("/enquiry");
   revalidatePath("/customers");
   revalidatePath("/follow-ups");
@@ -153,7 +153,6 @@ export async function updateLeadStatus(
 ) {
   const supabase = await createClient();
 
-  // 1. FETCH EXISTING NOTES FIRST
   const { data: lead } = await supabase
     .from("leads")
     .select("notes, mobile_number, customer_name")
@@ -161,15 +160,12 @@ export async function updateLeadStatus(
     .single();
 
   const existingNotes = lead?.notes || "";
-
-  // 2. Prepare Update Data
   const updateData: any = { status: newStatus };
 
   if (nextFollowUpDate !== undefined) {
     updateData.next_follow_up_date = nextFollowUpDate;
   }
 
-  // 3. Format the new note with a Timestamp AND the Future Date
   let formattedNote = "";
   if (note) {
     const timestamp = new Date().toLocaleString("en-IN", {
@@ -195,7 +191,6 @@ export async function updateLeadStatus(
     }
   }
 
-  // 4. Handle Cancelled and Follow Up logic
   if (newStatus === "Cancelled") {
     updateData.cancellation_reason =
       note || "Cancellation requested by customer/staff";
@@ -222,7 +217,6 @@ export async function updateLeadStatus(
       : formattedNote;
   }
 
-  // 5. Update the Lead status in the Database
   const { error: updateError } = await supabase
     .from("leads")
     .update(updateData)
@@ -233,7 +227,6 @@ export async function updateLeadStatus(
     throw new Error(updateError.message);
   }
 
-  // 6. AUTOMATION: Add EVERY person to the Customer Directory
   if (lead) {
     const { data: existing } = await supabase
       .from("customers")
@@ -312,7 +305,7 @@ export async function addCity(name: string) {
     .insert([{ name: name.trim() }]);
   if (error) throw new Error(error.message);
   revalidatePath("/cities");
-  revalidatePath("/enquiry");
+  revalidatePath("/enquiry"); // Updated path
 }
 
 export async function updateCity(id: string, name: string) {
