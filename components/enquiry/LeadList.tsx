@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { updateLeadStatus } from "@/lib/actions/lead.actions";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Search,
   Phone,
   Calendar,
@@ -550,67 +556,106 @@ export default function LeadList({
                     </td>
                   )}
 
+                  {/* ACTION BUTTONS WITH TOOLTIPS */}
                   <td className="px-4 py-3 text-right whitespace-nowrap">
-                    {lead.status !== "Booked" && lead.status !== "Cancelled" ? (
-                      <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {!isFollowUpRoute && (
-                          <button
-                            onClick={() =>
-                              setStatusModal({
-                                id: lead.id,
-                                status: "Booked",
-                                title: "Mark Booked",
-                                placeholder: "Add final booking details...",
-                              })
-                            }
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
-                            title="Mark as Booked"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                        )}
+                    <TooltipProvider delayDuration={0}>
+                      {lead.status !== "Booked" &&
+                      lead.status !== "Cancelled" ? (
+                        <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                          {!isFollowUpRoute && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={() =>
+                                    setStatusModal({
+                                      id: lead.id,
+                                      status: "Booked",
+                                      title: "Mark Booked",
+                                      placeholder:
+                                        "Add final booking details...",
+                                    })
+                                  }
+                                  className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <p className="text-xs font-semibold">
+                                  Mark as Booked
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
 
-                        <button
-                          onClick={() => openDrawer(lead)}
-                          className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
-                          title="View / Add Follow Up Note"
-                        >
-                          <Clock className="w-4 h-4" />
-                        </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => openDrawer(lead)}
+                                className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
+                              >
+                                <Clock className="w-4 h-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p className="text-xs font-semibold">
+                                View / Add Follow Up
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
 
-                        {!isFollowUpRoute && (
-                          <button
-                            onClick={() =>
-                              setStatusModal({
-                                id: lead.id,
-                                status: "Cancelled",
-                                title: "Cancel Lead",
-                                placeholder: "Why was this cancelled?...",
-                              })
-                            }
-                            className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
-                            title="Cancel Lead"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ) : lead.status === "Cancelled" &&
-                      (lead.notes || lead.cancellation_reason) ? (
-                      <div className="flex items-center justify-end pr-7">
-                        <button
-                          onClick={() => openDrawer(lead)}
-                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
-                          title="View Cancellation Reason"
-                        >
-                          <AlertCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-slate-400 italic font-medium">
-                        Completed
-                      </span>
-                    )}
+                          {!isFollowUpRoute && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={() =>
+                                    setStatusModal({
+                                      id: lead.id,
+                                      status: "Cancelled",
+                                      title: "Cancel Lead",
+                                      placeholder: "Why was this cancelled?...",
+                                    })
+                                  }
+                                  className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              </TooltipTrigger>
+                              {/* Cancel action pops to the LEFT */}
+                              <TooltipContent side="left">
+                                <p className="text-xs font-semibold">
+                                  Cancel Lead
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      ) : lead.status === "Cancelled" &&
+                        (lead.notes || lead.cancellation_reason) ? (
+                        <div className="flex items-center justify-end pr-7">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => openDrawer(lead)}
+                                className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
+                              >
+                                <AlertCircle className="w-4 h-4" />
+                              </button>
+                            </TooltipTrigger>
+                            {/* Cancellation Review action pops to the LEFT */}
+                            <TooltipContent side="left">
+                              <p className="text-xs font-semibold">
+                                View Cancellation Reason
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic font-medium">
+                          Completed
+                        </span>
+                      )}
+                    </TooltipProvider>
                   </td>
                 </tr>
               ))}

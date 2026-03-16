@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Search, Mail, Phone, Edit, UserPlus, Shield } from "lucide-react";
 import AddStaffModal from "./AddStaffModal";
-import EditStaffModal from "./EditStaffModal"; // We'll build this below
+import EditStaffModal from "./EditStaffModal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"; // <-- Added Tooltip imports
 
 export default function UsersListClient({
   initialUsers,
@@ -40,7 +46,7 @@ export default function UsersListClient({
             />
           </div>
           <select
-            className="input-primary py-2 text-sm w-auto bg-white shadow-sm"
+            className="input-primary py-2 text-sm w-auto bg-white shadow-sm font-medium"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
           >
@@ -52,9 +58,9 @@ export default function UsersListClient({
 
         <button
           onClick={() => setIsAddOpen(true)}
-          className="btn-brand flex items-center gap-2 shrink-0"
+          className="btn-brand flex items-center gap-2 shrink-0 px-4 py-2.5 text-sm font-semibold shadow-sm"
         >
-          <UserPlus className="w-4 h-4" /> Add User
+          <UserPlus className="w-[18px] h-[18px]" strokeWidth={2.5} /> Add User
         </button>
       </div>
 
@@ -105,13 +111,27 @@ export default function UsersListClient({
                 <td className="px-6 py-4 text-sm text-slate-600 font-medium">
                   {member.mobile_number || "—"}
                 </td>
+
+                {/* TOOLTIP ADDED HERE */}
                 <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => setEditingUser(member)}
-                    className="p-2 text-[#3da9d4] hover:bg-[#3da9d4]/10 rounded-lg transition-colors"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setEditingUser(member)}
+                          className="p-2 text-[#3da9d4] hover:bg-[#3da9d4]/10 rounded-lg transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="left"
+                        className="bg-slate-900 text-white border-none"
+                      >
+                        <p className="text-xs font-semibold">Edit User</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </td>
               </tr>
             ))}

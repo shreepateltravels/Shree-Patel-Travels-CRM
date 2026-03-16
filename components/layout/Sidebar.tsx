@@ -21,6 +21,12 @@ import {
 } from "lucide-react";
 import { signOut } from "@/lib/actions/auth.actions";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"; // Make sure this path matches your project!
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -43,7 +49,7 @@ export default function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isProfileExpanded, setIsProfileExpanded] = useState(false);
-  const [mounted, setMounted] = useState(false); 
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -95,57 +101,84 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* NAVIGATION LINKS */}
+        {/* NAVIGATION LINKS WITH TOOLTIPS */}
         <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
-          {navItems.map((item) => {
-            if (item.adminOnly && userRole !== "Admin") return null;
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
+          <TooltipProvider delayDuration={0}>
+            {navItems.map((item) => {
+              if (item.adminOnly && userRole !== "Admin") return null;
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer",
-                  isActive
-                    ? "bg-[#3da9d4]/10 text-[#3da9d4]"
-                    : "text-slate-900 hover:bg-slate-50",
-                  isCollapsed && "justify-center px-0",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "w-5 h-5 shrink-0 transition-colors",
-                    isActive ? "text-[#3da9d4]" : "group-hover:text-[#3da9d4]",
+              return (
+                <Tooltip key={item.name}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer",
+                        isActive
+                          ? "bg-[#3da9d4]/10 text-[#3da9d4]"
+                          : "text-slate-900 hover:bg-slate-50",
+                        isCollapsed && "justify-center px-0",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "w-5 h-5 shrink-0 transition-colors",
+                          isActive
+                            ? "text-[#3da9d4]"
+                            : "group-hover:text-[#3da9d4]",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "truncate transition-all duration-300 ease-in-out",
+                          isCollapsed
+                            ? "w-0 opacity-0 invisible"
+                            : "w-auto opacity-100 visible",
+                        )}
+                      >
+                        {item.name}
+                      </span>
+                    </Link>
+                  </TooltipTrigger>
+
+                  {/* Tooltip only shows up when the sidebar is collapsed */}
+                  {isCollapsed && (
+                    <TooltipContent
+                      side="right"
+                      className="bg-slate-900 text-white border-none ml-2"
+                    >
+                      <p className="text-xs font-semibold">{item.name}</p>
+                    </TooltipContent>
                   )}
-                />
-                <span
-                  className={cn(
-                    "truncate transition-all duration-300 ease-in-out",
-                    isCollapsed
-                      ? "w-0 opacity-0 invisible"
-                      : "w-auto opacity-100 visible",
-                  )}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
+                </Tooltip>
+              );
+            })}
+          </TooltipProvider>
         </nav>
 
         {/* PROFILE & LOGOUT SECTION */}
         <div className="p-2 pb-3 border-t border-slate-100 shrink-0 bg-white">
           {isCollapsed ? (
-            /* COLLAPSED: Red Logout Icon Button */
-            <button
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="flex items-center justify-center w-full py-3.5 rounded-[14px] bg-[#ee1c2e] text-white hover:bg-[#d41828] transition-colors shadow-sm animate-in fade-in duration-300"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5 shrink-0 ml-1" />
-            </button>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsLogoutModalOpen(true)}
+                    className="flex items-center justify-center w-full py-3.5 rounded-[14px] bg-[#ee1c2e] text-white hover:bg-[#d41828] transition-colors shadow-sm animate-in fade-in duration-300"
+                  >
+                    <LogOut className="w-5 h-5 shrink-0 ml-1" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="bg-slate-900 text-white border-none ml-2"
+                >
+                  <p className="text-xs font-semibold">Logout</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             /* EXPANDED: Interactive Profile Card Accordion */
             <div className="animate-in fade-in duration-300">
@@ -153,7 +186,6 @@ export default function Sidebar({
                 MY PROFILE
               </p>
 
-              {/* Accordion Container with Soft Shadow */}
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] transition-all duration-300">
                 <div
                   onClick={() => setIsProfileExpanded(!isProfileExpanded)}
@@ -187,7 +219,6 @@ export default function Sidebar({
                   </div>
                 </div>
 
-                {/* Hidden until clicked: Logout Button Area */}
                 <div
                   className={cn(
                     "transition-all duration-300 ease-in-out bg-white",
