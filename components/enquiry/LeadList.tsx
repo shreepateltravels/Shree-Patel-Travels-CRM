@@ -439,7 +439,7 @@ export default function LeadList({
         </div>
       </div>
 
-      {/* TABLE LIST - Removed artificial width constraints so columns spread evenly */}
+      {/* TABLE LIST */}
       <div className="flex-1 overflow-x-auto overflow-y-auto p-0 custom-scrollbar">
         {filteredLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">
@@ -459,6 +459,12 @@ export default function LeadList({
                 <th className="px-4 py-4 font-bold whitespace-nowrap">
                   Journey Date
                 </th>
+
+                {/* NEW COLUMN: Seats / Parcel Count */}
+                <th className="px-4 py-4 font-bold text-slate-600 leading-tight min-w-[90px]">
+                  No. of Seat / <br /> No. of Parcel
+                </th>
+
                 {showStatusFilter && (
                   <th className="px-4 py-4 font-bold whitespace-nowrap">
                     Status
@@ -523,6 +529,17 @@ export default function LeadList({
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm text-slate-600 font-medium">
                       {new Date(lead.journey_date).toLocaleDateString("en-GB")}
+                    </div>
+                  </td>
+
+                  {/* NEW COLUMN RENDER */}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="text-sm font-bold text-slate-700">
+                      {lead.type === "Ticket" ? (
+                        <span>{lead.number_of_seats || 0} Seats</span>
+                      ) : (
+                        <span>{lead.parcel_count || 0} Parcels</span>
+                      )}
                     </div>
                   </td>
 

@@ -29,7 +29,7 @@ export default async function DashboardPage() {
 
   const cards = [
     {
-      title: "Total Leads",
+      title: "Total Enquiry",
       value: data.total,
       icon: List,
       color: "hover:border-[#3da9d4]",
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       bg: "bg-[#3da9d4]/10",
     },
     {
-      title: "Open Leads",
+      title: "Open Enquiry",
       value: data.open,
       icon: FolderOpen,
       color: "hover:border-indigo-400",
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       bg: "bg-indigo-50",
     },
     {
-      title: "Follow Up Leads",
+      title: "Follow Up Enquiry",
       value: data.followUp,
       icon: Clock,
       color: "hover:border-amber-400",
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       bg: "bg-amber-50",
     },
     {
-      title: "Completed Leads",
+      title: "Completed Enquiry",
       value: data.completed,
       icon: CheckCircle,
       color: "hover:border-emerald-500",
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       bg: "bg-emerald-50",
     },
     {
-      title: "Cancelled Leads",
+      title: "Cancelled Enquiry",
       value: data.cancelled,
       icon: XCircle,
       color: "hover:border-rose-500",
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
       bg: "bg-rose-50",
     },
     {
-      title: "Auto Closed Leads",
+      title: "Auto Closed Enquiry",
       value: data.autoClosed,
       icon: Archive,
       color: "hover:border-slate-500",
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
                 <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
                   <tr>
                     <th className="px-6 py-4 font-semibold">Name</th>
-                    <th className="px-6 py-4 font-semibold">No</th>
+                    <th className="px-6 py-4 font-semibold">Number</th>
                     <th className="px-6 py-4 font-semibold">Type</th>
                     <th className="px-6 py-4 font-semibold">Route</th>
                     <th className="px-6 py-4 font-semibold">Journey Date</th>
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
             {[
               {
                 label: "View All Leads",
-                href: "/leads",
+                href: "/enquiry",
                 hover: "hover:bg-[#3da9d4]/10 hover:text-[#3da9d4]",
               },
               {
