@@ -27,6 +27,7 @@ import {
   History,
   PhoneCall,
   RefreshCw,
+  Info,
 } from "lucide-react";
 
 export default function LeadList({
@@ -69,11 +70,15 @@ export default function LeadList({
   const [statusModal, setStatusModal] = useState<any>(null); // For Booked/Cancelled
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  // DRAWER
+  // FOLLOW UP DRAWER
   const [followUpLead, setFollowUpLead] = useState<any>(null);
   const [followUpNote, setFollowUpNote] = useState("");
   const [nextFollowUpDate, setNextFollowUpDate] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // INFO / INITIAL NOTE CENTER MODAL
+  const [infoLead, setInfoLead] = useState<any>(null);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -88,14 +93,14 @@ export default function LeadList({
     filterDate,
   ]);
 
-  // Preload Follow-Up Date When Drawer Opens
+  // Preload Follow-Up Date When Follow-Up Drawer Opens
   useEffect(() => {
     if (followUpLead) {
       setNextFollowUpDate(followUpLead.next_follow_up_date || "");
     }
   }, [followUpLead]);
 
-  // SMOOTH DRAWER HANDLERS
+  // --- DRAWER & MODAL HANDLERS ---
   const openDrawer = (lead: any) => {
     setFollowUpLead(lead);
     setTimeout(() => setIsDrawerOpen(true), 10);
@@ -107,6 +112,18 @@ export default function LeadList({
       setFollowUpLead(null);
       setFollowUpNote("");
       setNextFollowUpDate("");
+    }, 300);
+  };
+
+  const openInfoModal = (lead: any) => {
+    setInfoLead(lead);
+    setIsInfoModalOpen(true);
+  };
+
+  const closeInfoModal = () => {
+    setIsInfoModalOpen(false);
+    setTimeout(() => {
+      setInfoLead(null);
     }, 300);
   };
 
@@ -184,7 +201,7 @@ export default function LeadList({
     }
   }
 
-  // Drawer Submission (Add Follow Up)
+  // Follow-Up Drawer Submission
   async function handleFollowUpSubmit() {
     if (!followUpLead || !followUpNote.trim()) return;
     try {
@@ -232,7 +249,19 @@ export default function LeadList({
     }
   }
 
-  // Helper to extract the most recent note text for the Reason column
+  // HELPER: Extract only the FIRST note for visibility checks
+  const getEnquiryNote = (notes: string) => {
+    if (!notes) return null;
+    const noteArray = notes.split("|||").filter(Boolean);
+    if (noteArray.length === 0) return null;
+    const firstNoteStr = noteArray[0];
+
+    const match = firstNoteStr.match(/^\[.*?\]\s*([\s\S]*?)(?:@@@|$)/);
+    const noteText = match && match[1] ? match[1].trim() : null;
+    return noteText === "—" ? null : noteText;
+  };
+
+  // HELPER: Extract the most recent note text for the Reason column
   const getLatestNote = (notes: string) => {
     if (!notes) return "—";
     const noteArray = notes.split("|||").filter(Boolean);
@@ -281,6 +310,7 @@ export default function LeadList({
     }
   };
 
+  // RENDER: Full timeline of notes (For Follow-Up Drawer)
   const renderTimelineNotes = (leadData: any) => {
     if (!leadData || (!leadData.notes && !leadData.cancellation_reason)) {
       return (
@@ -326,7 +356,6 @@ export default function LeadList({
 
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                   <div className="text-sm text-slate-700 font-medium whitespace-pre-wrap leading-relaxed">
-                    <span className="font-bold text-slate-800">Note: </span>
                     {actualNote}
                   </div>
 
@@ -460,9 +489,11 @@ export default function LeadList({
                   Journey Date
                 </th>
 
-                {/* NEW COLUMN: Seats / Parcel Count */}
-                <th className="px-4 py-4 font-bold text-slate-600 leading-tight min-w-[90px]">
-                  No. of Seat / <br /> No. of Parcel
+                {/* STRICT 2-LINE HEADER FIX */}
+                <th className="px-4 py-4 font-bold text-slate-500 leading-tight min-w-[130px]">
+                  <span className="whitespace-nowrap">No. of Seats /</span>
+                  <br />
+                  <span className="whitespace-nowrap">No. of Parcels</span>
                 </th>
 
                 {showStatusFilter && (
@@ -532,7 +563,6 @@ export default function LeadList({
                     </div>
                   </td>
 
-                  {/* NEW COLUMN RENDER */}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="text-sm font-bold text-slate-700">
                       {lead.type === "Ticket" ? (
@@ -576,102 +606,121 @@ export default function LeadList({
                   {/* ACTION BUTTONS WITH TOOLTIPS */}
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <TooltipProvider delayDuration={0}>
-                      {lead.status !== "Booked" &&
-                      lead.status !== "Cancelled" ? (
-                        <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                          {!isFollowUpRoute && (
+                      <div className="flex items-center justify-end gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                        {/* 1. CLICKABLE VIEW NOTE ICON (Opens Center Modal) - NOW VISIBLE EVERYWHERE */}
+                        {getEnquiryNote(lead.notes) && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => openInfoModal(lead)}
+                                className="p-1.5 text-[#3da9d4] hover:bg-[#3da9d4]/10 rounded-lg transition-colors"
+                              >
+                                <Info className="w-4 h-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p className="text-xs font-semibold">View Note</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+
+                        {/* 2. THE REST OF THE ACTIONS */}
+                        {lead.status !== "Booked" &&
+                        lead.status !== "Cancelled" ? (
+                          <>
+                            {!isFollowUpRoute && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() =>
+                                      setStatusModal({
+                                        id: lead.id,
+                                        status: "Booked",
+                                        title: "Mark Booked",
+                                        placeholder:
+                                          "Add final booking details...",
+                                      })
+                                    }
+                                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                  >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  <p className="text-xs font-semibold">
+                                    Mark as Booked
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button
-                                  onClick={() =>
-                                    setStatusModal({
-                                      id: lead.id,
-                                      status: "Booked",
-                                      title: "Mark Booked",
-                                      placeholder:
-                                        "Add final booking details...",
-                                    })
-                                  }
-                                  className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                  onClick={() => openDrawer(lead)}
+                                  className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
                                 >
-                                  <CheckCircle2 className="w-4 h-4" />
+                                  <Clock className="w-4 h-4" />
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent side="top">
                                 <p className="text-xs font-semibold">
-                                  Mark as Booked
+                                  View / Add Follow Up
                                 </p>
                               </TooltipContent>
                             </Tooltip>
-                          )}
 
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => openDrawer(lead)}
-                                className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
-                              >
-                                <Clock className="w-4 h-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <p className="text-xs font-semibold">
-                                View / Add Follow Up
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-
-                          {!isFollowUpRoute && (
+                            {!isFollowUpRoute && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() =>
+                                      setStatusModal({
+                                        id: lead.id,
+                                        status: "Cancelled",
+                                        title: "Cancel Lead",
+                                        placeholder:
+                                          "Why was this cancelled?...",
+                                      })
+                                    }
+                                    className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                  <p className="text-xs font-semibold">
+                                    Cancel Lead
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </>
+                        ) : lead.status === "Cancelled" &&
+                          (lead.notes || lead.cancellation_reason) ? (
+                          <div className="flex items-center justify-end">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button
-                                  onClick={() =>
-                                    setStatusModal({
-                                      id: lead.id,
-                                      status: "Cancelled",
-                                      title: "Cancel Lead",
-                                      placeholder: "Why was this cancelled?...",
-                                    })
-                                  }
-                                  className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                  onClick={() => openDrawer(lead)}
+                                  className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
                                 >
-                                  <XCircle className="w-4 h-4" />
+                                  <AlertCircle className="w-4 h-4" />
                                 </button>
                               </TooltipTrigger>
-                              {/* Cancel action pops to the LEFT */}
                               <TooltipContent side="left">
                                 <p className="text-xs font-semibold">
-                                  Cancel Lead
+                                  View Cancellation Reason
                                 </p>
                               </TooltipContent>
                             </Tooltip>
-                          )}
-                        </div>
-                      ) : lead.status === "Cancelled" &&
-                        (lead.notes || lead.cancellation_reason) ? (
-                        <div className="flex items-center justify-end pr-7">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => openDrawer(lead)}
-                                className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
-                              >
-                                <AlertCircle className="w-4 h-4" />
-                              </button>
-                            </TooltipTrigger>
-                            {/* Cancellation Review action pops to the LEFT */}
-                            <TooltipContent side="left">
-                              <p className="text-xs font-semibold">
-                                View Cancellation Reason
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic font-medium">
-                          Completed
-                        </span>
-                      )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic font-medium ml-2 mr-1">
+                            Completed
+                          </span>
+                        )}
+                      </div>
                     </TooltipProvider>
                   </td>
                 </tr>
@@ -716,9 +765,9 @@ export default function LeadList({
         </div>
       </div>
 
-      {/* CENTER MODAL */}
+      {/* STATUS ACTION CENTER MODAL (Booked/Cancelled) */}
       {statusModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
             <div className="p-6">
               <h3 className="text-lg font-bold text-slate-800 mb-3">
@@ -756,7 +805,52 @@ export default function LeadList({
         </div>
       )}
 
-      {/* SMOOTH SINGLE DRAWER */}
+      {/* ------------------------------------------------------------------------------------------------ */}
+      {/* 1. INITIAL NOTE CENTER MODAL (READ ONLY) */}
+      {/* ------------------------------------------------------------------------------------------------ */}
+      {isInfoModalOpen && infoLead && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-50 text-[#3da9d4] border border-blue-100">
+                  <Info className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">
+                    Initial Enquiry Note
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500">
+                    {infoLead.customer_name}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-slate-50">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3da9d4]"></div>
+                <p className="text-sm text-slate-700 font-medium whitespace-pre-wrap leading-relaxed pl-2">
+                  {getEnquiryNote(infoLead.notes)}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white border-t border-slate-100 flex justify-end">
+              <button
+                onClick={closeInfoModal}
+                className="px-5 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------------------------------------ */}
+      {/* 2. MAIN FOLLOW-UP DRAWER (WITH ADD NOTE OPTION & TIMELINE) */}
+      {/* ------------------------------------------------------------------------------------------------ */}
       {followUpLead && (
         <div
           className={`fixed inset-0 z-[100] flex justify-end transition-opacity duration-300 ease-in-out ${
@@ -764,7 +858,7 @@ export default function LeadList({
           }`}
         >
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40"
             onClick={closeDrawer}
           />
 
