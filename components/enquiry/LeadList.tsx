@@ -553,216 +553,229 @@ export default function LeadList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {currentLeads.map((lead) => (
-                <tr
-                  key={lead.id}
-                  className="hover:bg-slate-50/80 transition-colors group"
-                >
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#3da9d4]/10 flex items-center justify-center text-[#3da9d4] font-bold shrink-0 text-xs">
-                        {(lead.customer_name || "U").charAt(0).toUpperCase()}
-                      </div>
-                      <span className="font-bold text-slate-800 text-sm">
-                        {lead.customer_name}
-                      </span>
-                    </div>
-                  </td>
+              {currentLeads.map((lead) => {
+                // HARD CHECK: Is this specific lead auto closed?
+                const isAutoClosed =
+                  lead.status === "New" && lead.journey_date < todayStr;
 
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span
-                      className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${
-                        lead.type === "Ticket"
-                          ? "bg-indigo-50 text-indigo-600 border border-indigo-100"
-                          : "bg-orange-50 text-orange-600 border border-orange-100"
-                      }`}
-                    >
-                      {lead.type}
-                    </span>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm text-slate-600 font-medium">
-                      {lead.mobile_number}
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm text-slate-700 font-semibold flex items-center gap-1.5">
-                      {lead.from_city?.name}{" "}
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-400" />{" "}
-                      {lead.to_city?.name}
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm text-slate-600 font-medium">
-                      {new Date(lead.journey_date).toLocaleDateString("en-GB")}
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm font-bold text-slate-700">
-                      {lead.type === "Ticket" ? (
-                        <span>{lead.number_of_seats || 0} Seats</span>
-                      ) : (
-                        <span>{lead.parcel_count || 0} Parcels</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {showStatusFilter && (
+                return (
+                  <tr
+                    key={lead.id}
+                    className="hover:bg-slate-50/80 transition-colors group"
+                  >
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {getStatusBadge(lead.status, lead.journey_date)}
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-[#3da9d4]/10 flex items-center justify-center text-[#3da9d4] font-bold shrink-0 text-xs">
+                          {(lead.customer_name || "U").charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-bold text-slate-800 text-sm">
+                          {lead.customer_name}
+                        </span>
+                      </div>
                     </td>
-                  )}
 
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {lead.status !== "Booked" &&
-                    lead.status !== "Cancelled" &&
-                    lead.next_follow_up_date ? (
-                      <span className="text-sm text-slate-700 font-medium">
-                        {new Date(lead.next_follow_up_date).toLocaleDateString(
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span
+                        className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${
+                          lead.type === "Ticket"
+                            ? "bg-indigo-50 text-indigo-600 border border-indigo-100"
+                            : "bg-orange-50 text-orange-600 border border-orange-100"
+                        }`}
+                      >
+                        {lead.type}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm text-slate-600 font-medium">
+                        {lead.mobile_number}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm text-slate-700 font-semibold flex items-center gap-1.5">
+                        {lead.from_city?.name}{" "}
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-400" />{" "}
+                        {lead.to_city?.name}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm text-slate-600 font-medium">
+                        {new Date(lead.journey_date).toLocaleDateString(
                           "en-GB",
                         )}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-slate-300 font-medium">
-                        —
-                      </span>
-                    )}
-                  </td>
-
-                  {isFollowUpRoute && (
-                    <td className="px-4 py-3 min-w-[200px] whitespace-normal break-words">
-                      <div className="text-sm text-slate-600 leading-snug">
-                        {getLatestNote(lead.notes)}
                       </div>
                     </td>
-                  )}
 
-                  {/* ACTION BUTTONS WITH TOOLTIPS */}
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <TooltipProvider delayDuration={0}>
-                      <div className="flex items-center justify-end gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {/* 1. CLICKABLE VIEW NOTE ICON (Opens Center Modal) */}
-                        {getEnquiryNote(lead.notes) && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => openInfoModal(lead)}
-                                className="p-1.5 text-[#3da9d4] hover:bg-[#3da9d4]/10 rounded-lg transition-colors"
-                              >
-                                <Info className="w-4 h-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <p className="text-xs font-semibold">View Note</p>
-                            </TooltipContent>
-                          </Tooltip>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-sm font-bold text-slate-700">
+                        {lead.type === "Ticket" ? (
+                          <span>{lead.number_of_seats || 0} Seats</span>
+                        ) : (
+                          <span>{lead.parcel_count || 0} Parcels</span>
                         )}
+                      </div>
+                    </td>
 
-                        {/* 2. THE REST OF THE ACTIONS */}
-                        {lead.status !== "Booked" &&
-                        lead.status !== "Cancelled" ? (
-                          <>
-                            {!isFollowUpRoute && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() =>
-                                      setStatusModal({
-                                        id: lead.id,
-                                        status: "Booked",
-                                        title: "Mark Booked",
-                                        placeholder:
-                                          "Add final booking details...",
-                                      })
-                                    }
-                                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
-                                  >
-                                    <CheckCircle2 className="w-4 h-4" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                  <p className="text-xs font-semibold">
-                                    Mark as Booked
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
+                    {showStatusFilter && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {getStatusBadge(lead.status, lead.journey_date)}
+                      </td>
+                    )}
 
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {lead.status !== "Booked" &&
+                      lead.status !== "Cancelled" &&
+                      lead.next_follow_up_date ? (
+                        <span className="text-sm text-slate-700 font-medium">
+                          {new Date(
+                            lead.next_follow_up_date,
+                          ).toLocaleDateString("en-GB")}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-slate-300 font-medium">
+                          —
+                        </span>
+                      )}
+                    </td>
+
+                    {isFollowUpRoute && (
+                      <td className="px-4 py-3 min-w-[200px] whitespace-normal break-words">
+                        <div className="text-sm text-slate-600 leading-snug">
+                          {getLatestNote(lead.notes)}
+                        </div>
+                      </td>
+                    )}
+
+                    {/* ACTION BUTTONS WITH TOOLTIPS */}
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <TooltipProvider delayDuration={0}>
+                        <div className="flex items-center justify-end gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                          {/* 1. CLICKABLE VIEW NOTE ICON (Opens Center Modal) */}
+                          {getEnquiryNote(lead.notes) && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <button
-                                  onClick={() => openDrawer(lead)}
-                                  className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
+                                  onClick={() => openInfoModal(lead)}
+                                  className="p-1.5 text-[#3da9d4] hover:bg-[#3da9d4]/10 rounded-lg transition-colors"
                                 >
-                                  <Clock className="w-4 h-4" />
+                                  <Info className="w-4 h-4" />
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent side="top">
                                 <p className="text-xs font-semibold">
-                                  View / Add Follow Up
+                                  View Note
                                 </p>
                               </TooltipContent>
                             </Tooltip>
+                          )}
 
-                            {!isFollowUpRoute && (
+                          {/* 2. THE REST OF THE ACTIONS */}
+                          {lead.status === "Cancelled" &&
+                          (lead.notes || lead.cancellation_reason) ? (
+                            <div className="flex items-center justify-end">
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <button
-                                    onClick={() =>
-                                      setStatusModal({
-                                        id: lead.id,
-                                        status: "Cancelled",
-                                        title: "Cancel Lead",
-                                        placeholder:
-                                          "Why was this cancelled?...",
-                                      })
-                                    }
-                                    className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                    onClick={() => openDrawer(lead)}
+                                    className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
                                   >
-                                    <XCircle className="w-4 h-4" />
+                                    <AlertCircle className="w-4 h-4" />
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left">
                                   <p className="text-xs font-semibold">
-                                    Cancel Lead
+                                    View Cancellation Reason
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
-                            )}
-                          </>
-                        ) : lead.status === "Cancelled" &&
-                          (lead.notes || lead.cancellation_reason) ? (
-                          <div className="flex items-center justify-end">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => openDrawer(lead)}
-                                  className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors border border-rose-100 bg-rose-50 shadow-sm"
-                                >
-                                  <AlertCircle className="w-4 h-4" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="left">
-                                <p className="text-xs font-semibold">
-                                  View Cancellation Reason
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic font-medium ml-2 mr-1">
-                            Completed
-                          </span>
-                        )}
-                      </div>
-                    </TooltipProvider>
-                  </td>
-                </tr>
-              ))}
+                            </div>
+                          ) : lead.status === "Booked" ||
+                            lead.status === "Cancelled" ? (
+                            <span className="text-xs text-slate-400 italic font-medium ml-2 mr-1">
+                              Completed
+                            </span>
+                          ) : (
+                            <>
+                              {/* HIDE BOOK BUTTON IF AUTO CLOSED OR FOLLOW UP ROUTE */}
+                              {!isFollowUpRoute && !isAutoClosed && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() =>
+                                        setStatusModal({
+                                          id: lead.id,
+                                          status: "Booked",
+                                          title: "Mark Booked",
+                                          placeholder:
+                                            "Add final booking details...",
+                                        })
+                                      }
+                                      className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                    >
+                                      <CheckCircle2 className="w-4 h-4" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    <p className="text-xs font-semibold">
+                                      Mark as Booked
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+
+                              {/* FOLLOW UP BUTTON ALWAYS SHOWS */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() => openDrawer(lead)}
+                                    className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
+                                  >
+                                    <Clock className="w-4 h-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  <p className="text-xs font-semibold">
+                                    View / Add Follow Up
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+
+                              {/* HIDE CANCEL BUTTON IF AUTO CLOSED OR FOLLOW UP ROUTE */}
+                              {!isFollowUpRoute && !isAutoClosed && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() =>
+                                        setStatusModal({
+                                          id: lead.id,
+                                          status: "Cancelled",
+                                          title: "Cancel Lead",
+                                          placeholder:
+                                            "Why was this cancelled?...",
+                                        })
+                                      }
+                                      className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left">
+                                    <p className="text-xs font-semibold">
+                                      Cancel Lead
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </TooltipProvider>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -782,27 +795,20 @@ export default function LeadList({
           of <strong className="text-slate-700">{filteredLeads.length}</strong>{" "}
           leads
         </span>
-
-        {/* CHANGED: gap-2 to gap-1 to pull buttons closer */}
         <div className="flex items-center gap-1">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
             className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             <ChevronLeft className="w-4 h-4" /> Prev
           </button>
-
-          {/* CHANGED: py-1.5 to py-1, px-4 to px-3 */}
           <div className="px-3 py-1 text-sm font-bold text-[#3da9d4] bg-[#3da9d4]/10 border border-[#3da9d4]/20 rounded-lg shadow-sm">
             {currentPage} / {Math.max(1, totalPages)}
           </div>
-
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages || totalPages === 0}
-            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
             className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             Next <ChevronRight className="w-4 h-4" />
@@ -870,7 +876,6 @@ export default function LeadList({
                   </p>
                 </div>
               </div>
-              {/* Removed the X icon completely from here */}
             </div>
 
             <div className="p-6 bg-slate-50">
