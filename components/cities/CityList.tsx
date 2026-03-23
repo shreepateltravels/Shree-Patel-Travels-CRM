@@ -38,9 +38,8 @@ export default function CityList({ initialCities }: { initialCities: City[] }) {
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; 
+  const itemsPerPage = 10;
 
-  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -91,7 +90,6 @@ export default function CityList({ initialCities }: { initialCities: City[] }) {
       await deleteCity(cityToDelete.id);
       setCityToDelete(null);
 
-      
       if (currentCities.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       }

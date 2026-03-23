@@ -7,7 +7,8 @@ export default async function LeadsPage() {
   const cities = await getCities();
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-144px)] animate-in fade-in duration-500">
+    // CHANGED: gap-6 is now gap-3
+    <div className="flex flex-col lg:flex-row gap-3 h-[calc(100vh-144px)] animate-in fade-in duration-500">
       <div className="flex-1 min-h-0 h-full overflow-hidden">
         <LeadList
           initialLeads={allLeads}

@@ -54,6 +54,9 @@ export default function LeadList({
   const isFollowUpRoute =
     isFollowUpPage || (pathname && pathname.toLowerCase().includes("follow"));
 
+  // TABS
+  const [activeTab, setActiveTab] = useState<"Main" | "AutoClosed">("Main");
+
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -85,6 +88,7 @@ export default function LeadList({
   useEffect(() => {
     setCurrentPage(1);
   }, [
+    activeTab,
     searchTerm,
     filterType,
     filterStatus,
@@ -152,11 +156,20 @@ export default function LeadList({
     const matchesTo = filterToCity ? lead.to_city_id === filterToCity : true;
     const matchesDate = filterDate ? lead.journey_date === filterDate : true;
 
+    // Detect if this lead is specifically Auto Closed
+    const isLeadAutoClosed =
+      lead.status === "New" && lead.journey_date < todayStr;
+
+    // TAB LOGIC (Only applies if not on the Follow Ups page)
+    if (!isFollowUpRoute) {
+      if (activeTab === "AutoClosed" && !isLeadAutoClosed) return false;
+      if (activeTab === "Main" && isLeadAutoClosed) return false;
+    }
+
+    // STATUS LOGIC
     let matchesStatus = true;
-    if (filterStatus) {
-      if (filterStatus === "Auto Closed") {
-        matchesStatus = lead.status === "New" && lead.journey_date < todayStr;
-      } else if (filterStatus === "New") {
+    if (filterStatus && (activeTab === "Main" || isFollowUpRoute)) {
+      if (filterStatus === "New") {
         matchesStatus = lead.status === "New" && lead.journey_date >= todayStr;
       } else {
         matchesStatus = lead.status === filterStatus;
@@ -385,6 +398,32 @@ export default function LeadList({
 
   return (
     <div className="saas-card bg-white flex flex-col h-full border-t-4 border-t-[#3da9d4] overflow-hidden relative">
+      {/* ---------------- TABS (Hidden on Follow Up page) ---------------- */}
+      {!isFollowUpRoute && (
+        <div className="flex items-center gap-6 px-5 pt-4 border-b border-slate-100 bg-white shrink-0">
+          <button
+            onClick={() => setActiveTab("Main")}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === "Main"
+                ? "border-[#3da9d4] text-[#3da9d4]"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            Main Leads
+          </button>
+          <button
+            onClick={() => setActiveTab("AutoClosed")}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === "AutoClosed"
+                ? "border-slate-400 text-slate-600"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            Auto Closed
+          </button>
+        </div>
+      )}
+
       {/* FILTER BAR */}
       <div className="p-4 border-b border-slate-100 flex flex-col xl:flex-row gap-3 items-center bg-slate-50/50 shrink-0">
         <div className="relative w-full xl:flex-1 min-w-[150px]">
@@ -408,7 +447,8 @@ export default function LeadList({
           <option value="Parcel">Parcel</option>
         </select>
 
-        {showStatusFilter && (
+        {/* STATUS FILTER - Hidden completely on the Auto Closed tab */}
+        {showStatusFilter && activeTab === "Main" && (
           <select
             className="input-primary py-2 text-sm w-full xl:w-auto bg-white shadow-sm font-medium"
             value={filterStatus}
@@ -418,7 +458,6 @@ export default function LeadList({
             <option value="New">New</option>
             <option value="Follow Up">Follow Up</option>
             <option value="Cancelled">Cancelled</option>
-            <option value="Auto Closed">Auto Closed</option>
           </select>
         )}
 
@@ -489,7 +528,6 @@ export default function LeadList({
                   Journey Date
                 </th>
 
-                {/* STRICT 2-LINE HEADER FIX */}
                 <th className="px-4 py-4 font-bold text-slate-500 leading-tight min-w-[130px]">
                   <span className="whitespace-nowrap">No. of Seats /</span>
                   <br />
@@ -607,7 +645,7 @@ export default function LeadList({
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <TooltipProvider delayDuration={0}>
                       <div className="flex items-center justify-end gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                        {/* 1. CLICKABLE VIEW NOTE ICON (Opens Center Modal) - NOW VISIBLE EVERYWHERE */}
+                        {/* 1. CLICKABLE VIEW NOTE ICON (Opens Center Modal) */}
                         {getEnquiryNote(lead.notes) && (
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -731,7 +769,7 @@ export default function LeadList({
       </div>
 
       {/* PAGINATION CONTROLS */}
-      <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+      <div className="py-2 px-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
         <span className="text-sm text-slate-500 font-medium">
           Showing{" "}
           <strong className="text-slate-700">
@@ -744,21 +782,28 @@ export default function LeadList({
           of <strong className="text-slate-700">{filteredLeads.length}</strong>{" "}
           leads
         </span>
-        <div className="flex items-center gap-2">
+
+        {/* CHANGED: gap-2 to gap-1 to pull buttons closer */}
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
+            className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             <ChevronLeft className="w-4 h-4" /> Prev
           </button>
-          <div className="px-4 py-1.5 text-sm font-bold text-[#3da9d4] bg-[#3da9d4]/10 border border-[#3da9d4]/20 rounded-lg shadow-sm">
+
+          {/* CHANGED: py-1.5 to py-1, px-4 to px-3 */}
+          <div className="px-3 py-1 text-sm font-bold text-[#3da9d4] bg-[#3da9d4]/10 border border-[#3da9d4]/20 rounded-lg shadow-sm">
             {currentPage} / {Math.max(1, totalPages)}
           </div>
+
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages || totalPages === 0}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
+            className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             Next <ChevronRight className="w-4 h-4" />
           </button>
@@ -825,6 +870,7 @@ export default function LeadList({
                   </p>
                 </div>
               </div>
+              {/* Removed the X icon completely from here */}
             </div>
 
             <div className="p-6 bg-slate-50">

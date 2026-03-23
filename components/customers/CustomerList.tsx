@@ -37,7 +37,6 @@ export default function CustomerList({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -168,7 +167,7 @@ export default function CustomerList({
       </div>
 
       {/* PAGINATION CONTROLS */}
-      <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+      <div className="py-2 px-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
         <span className="text-sm text-slate-500 font-medium">
           Showing{" "}
           <strong className="text-slate-700">
@@ -182,21 +181,28 @@ export default function CustomerList({
           <strong className="text-slate-700">{filteredCustomers.length}</strong>{" "}
           customers
         </span>
-        <div className="flex items-center gap-2">
+
+        {/* CHANGED: gap-2 to gap-1 to pull buttons closer */}
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
+            className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             <ChevronLeft className="w-4 h-4" /> Prev
           </button>
-          <div className="px-4 py-1.5 text-sm font-bold text-[#3da9d4] bg-[#3da9d4]/10 border border-[#3da9d4]/20 rounded-lg shadow-sm">
+
+          {/* CHANGED: py-1.5 to py-1, px-4 to px-3 */}
+          <div className="px-3 py-1 text-sm font-bold text-[#3da9d4] bg-[#3da9d4]/10 border border-[#3da9d4]/20 rounded-lg shadow-sm">
             {currentPage} / {Math.max(1, totalPages)}
           </div>
+
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages || totalPages === 0}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            // CHANGED: py-1.5 to py-1, px-3 to px-2.5
+            className="flex items-center gap-1 px-2.5 py-1 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           >
             Next <ChevronRight className="w-4 h-4" />
           </button>
